@@ -25,7 +25,7 @@ type Server struct {
 }
 
 func SetupServer(otlpConfig otlpprovider.OtlpConfig) *Server {
-	tracer, err := otlpprovider.InitTracer(otlpConfig)
+	tracer, err := otlpprovider.InitTracer(otlpConfig.Tracer)
 	if err != nil {
 		slog.Warn("failed to init tracer", slog.String("err", err.Error()))
 	}
@@ -39,10 +39,10 @@ func SetupServer(otlpConfig otlpprovider.OtlpConfig) *Server {
 	serverApp.Server.Use(cors.New(cors.Config{}))
 	serverApp.Server.Use(recover.New())
 
-	serverApp.Server.Use(otlppfiber.PrometheusMeterMiddleware)
-	serverApp.Server.Use(otlppfiber.OtlpJaegerTracerMiddleware)
-	serverApp.Server.Use(otlppfiber.StdoutLoggerMiddleware)
-	serverApp.Server.Use(otlppfiber.RemoteLokiLoggerMiddleware)
+	serverApp.Server.Use(otlppfiber.PrometheusMeterMiddleware(serverApp.Server))
+	serverApp.Server.Use(otlppfiber.OtlpJaegerTracerMiddleware())
+	serverApp.Server.Use(otlppfiber.StdoutLoggerMiddleware(otlpConfig.Logger))
+	serverApp.Server.Use(otlppfiber.RemoteLokiLoggerMiddleware(otlpConfig.Logger))
 
 	serverApp.Server.Get("/monitor", monitor.New())
 

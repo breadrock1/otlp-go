@@ -1,10 +1,10 @@
 package fiber
 
 import (
-	"otlp-go/pkg/provider"
-
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
+
+	"otlp-go/pkg/provider"
 )
 
 const (

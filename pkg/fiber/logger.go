@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"otlp-go/pkg/provider"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+
+	"otlp-go/pkg/provider"
 )
 
 const (
@@ -17,7 +18,8 @@ const (
 	ContextRequestIDKey = "request_id"
 )
 
-func StdoutLoggerMiddleware(logger *slog.Logger) fiber.Handler {
+func StdoutLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
+	logger := provider.InitLocalLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {
 			return eCtx.Next()
@@ -71,7 +73,8 @@ func StdoutLoggerMiddleware(logger *slog.Logger) fiber.Handler {
 	}
 }
 
-func RemoteLokiLoggerMiddleware(logger *slog.Logger) fiber.Handler {
+func RemoteLokiLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
+	logger := provider.InitLokiLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {
 			return eCtx.Next()

@@ -1,11 +1,12 @@
 package fiber
 
 import (
-	"otlp-go/pkg/provider"
 	"strings"
 
 	"github.com/gofiber/contrib/otelfiber/v2"
 	"github.com/gofiber/fiber/v2"
+
+	"otlp-go/pkg/provider"
 )
 
 func OtlpJaegerTracerMiddleware() fiber.Handler {

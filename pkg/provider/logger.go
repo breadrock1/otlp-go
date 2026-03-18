@@ -11,9 +11,9 @@ import (
 	slogloki "github.com/samber/slog-loki/v2"
 )
 
-func InitLocalLoggerProvider(otlpConfig OtlpConfig) *slog.Logger {
+func InitLocalLoggerProvider(config LoggerConfig) *slog.Logger {
 	slogPrettyOpts := &slogpretty.Options{
-		Level: getLevelType(otlpConfig.Logger),
+		Level: getLevelType(config),
 	}
 
 	textHandler := slogpretty.New(os.Stdout, slogPrettyOpts)
@@ -21,10 +21,10 @@ func InitLocalLoggerProvider(otlpConfig OtlpConfig) *slog.Logger {
 	return localLogger
 }
 
-func InitLokiLoggerProvider(otlpConfig OtlpConfig) *slog.Logger {
-	level := getLevelType(otlpConfig.Logger)
+func InitLokiLoggerProvider(config LoggerConfig) *slog.Logger {
+	level := getLevelType(config)
 	lokiConfig := slogloki.Option{
-		Endpoint:           fmt.Sprintf("%s/api/prom/push", otlpConfig.Logger.Address),
+		Endpoint:           fmt.Sprintf("%s/api/prom/push", config.Address),
 		Level:              slog.LevelInfo,
 		BatchWait:          time.Second * 5,
 		BatchEntriesNumber: 10,
