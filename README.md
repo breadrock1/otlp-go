@@ -8,19 +8,28 @@ There is library to enable observability on rust service with following abilitie
 
 ## Quick Start
 
-1. Need to include this repository into project Cargo.toml manifest file:
+1. Download library to project dir, for example into `third/`
 
-   Install library using go get:
-   ```shell
-   go get <address-to-library>
-    ```
-   
-    example:
-    
     ```shell
-    go get 192.168.0.84:3000/breadrock1/otlp-go
+    git clone <gitlab-url>/breadrock1/otlp-go.git third/otlp-go
     ```
 
-2. Past example code into main function (see [examples](examples/simple)):
+2. Create go.work and include this library into use block:
 
-3. Use it!
+    ```text
+    go 1.25.0
+
+    use (
+        third/otlp-go
+        .
+    )
+    ```
+
+3. Update project state:
+    ```shell
+    go mod tidy
+    ```
+
+4. Past example code into main function (see [examples](examples/simple)):
+
+5. Use it!
