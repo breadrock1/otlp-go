@@ -7,10 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/breadrock1/otlp-go/otlp"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-
-	"otlp-go/pkg/provider"
 )
 
 const (
@@ -18,8 +17,8 @@ const (
 	ContextRequestIDKey = "request_id"
 )
 
-func StdoutLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
-	logger := provider.InitLocalLoggerProvider(config)
+func StdoutLoggerMiddleware(config otlp_go.LoggerConfig) fiber.Handler {
+	logger := otlp_go.InitLocalLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {
 			return eCtx.Next()
@@ -43,6 +42,7 @@ func StdoutLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
 
 		statusCode := eCtx.Response().StatusCode()
 		if err != nil {
+			//nolint
 			if fiberErr, ok := err.(*fiber.Error); ok {
 				statusCode = fiberErr.Code
 			}
@@ -73,8 +73,8 @@ func StdoutLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
 	}
 }
 
-func RemoteLokiLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
-	logger := provider.InitLokiLoggerProvider(config)
+func RemoteLokiLoggerMiddleware(config otlp_go.LoggerConfig) fiber.Handler {
+	logger := otlp_go.InitLokiLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {
 			return eCtx.Next()
@@ -116,7 +116,7 @@ func RemoteLokiLoggerMiddleware(config provider.LoggerConfig) fiber.Handler {
 }
 
 func checkFilteredURI(urlPath string) bool {
-	for _, filtered := range provider.ExcludedPaths {
+	for _, filtered := range otlp_go.ExcludedPaths {
 		if strings.HasPrefix(urlPath, filtered) {
 			return true
 		}

@@ -8,14 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/breadrock1/otlp-go/otlp"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.opentelemetry.io/otel/trace"
 
-	otlppfiber "otlp-go/pkg/fiber"
-	otlpprovider "otlp-go/pkg/provider"
+	otlppfiber "github.com/breadrock1/otlp-go/pkg/fiber"
 )
 
 type Server struct {
@@ -24,8 +24,8 @@ type Server struct {
 	Server *fiber.App
 }
 
-func SetupServer(otlpConfig otlpprovider.OtlpConfig) *Server {
-	tracer, err := otlpprovider.InitTracer(otlpConfig.Tracer)
+func SetupServer(otlpConfig otlp_go.OtlpConfig) *Server {
+	tracer, err := otlp_go.InitTracer(otlpConfig.Tracer)
 	if err != nil {
 		slog.Warn("failed to init tracer", slog.String("err", err.Error()))
 	}
@@ -67,13 +67,13 @@ func (s *Server) Shutdown(_ context.Context) error {
 }
 
 func main() {
-	otlpConfig := otlpprovider.OtlpConfig{
-		Logger: otlpprovider.LoggerConfig{
+	otlpConfig := otlp_go.OtlpConfig{
+		Logger: otlp_go.LoggerConfig{
 			Level:      "debug",
 			Address:    "http://loki:3100",
 			EnableLoki: true,
 		},
-		Tracer: otlpprovider.TracerConfig{
+		Tracer: otlp_go.TracerConfig{
 			Address:      "http://jaeger:4317",
 			EnableJaeger: true,
 		},

@@ -1,4 +1,4 @@
-package provider
+package otlp_go
 
 type OtlpConfig struct {
 	Logger LoggerConfig `yaml:"logger"`

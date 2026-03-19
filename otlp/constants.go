@@ -1,4 +1,4 @@
-package provider
+package otlp_go
 
 var (
 	ExcludedPaths = []string{
