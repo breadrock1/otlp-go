@@ -1,4 +1,4 @@
-module otlp-go
+module github.com/breadrock1/otlp-go
 
 go 1.25.0
 
