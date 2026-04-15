@@ -11,25 +11,9 @@ There is library to enable observability on rust service with following abilitie
 1. Download library to project dir, for example into `third/`
 
     ```shell
-    git clone <gitlab-url>/breadrock1/otlp-go.git third/otlp-go
+    git clone github.com/breadrock1/otlp-go.git
     ```
 
-2. Create go.work and include this library into use block:
+2. Past example code into main function (see [examples](examples/simple)):
 
-    ```text
-    go 1.25.0
-
-    use (
-        third/otlp-go
-        .
-    )
-    ```
-
-3. Update project state:
-    ```shell
-    go mod tidy
-    ```
-
-4. Past example code into main function (see [examples](examples/simple)):
-
-5. Use it!
+3. Use it!
