@@ -15,8 +15,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 )
 
-const AppName = "news-monitoring"
-
 var (
 	GlobalTracer    trace.Tracer
 	TracePropagator = propagation.NewCompositeTextMapPropagator(
@@ -25,14 +23,14 @@ var (
 	)
 )
 
-func InitTraceProvider(config TracerConfig) (trace.Tracer, error) {
+func InitTraceProvider(appName string, config TracerConfig) (trace.Tracer, error) {
 	sampler := sdktrace.AlwaysSample()
 	res, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.TelemetrySDKLanguageGo,
-			semconv.ServiceNameKey.String(AppName),
+			semconv.ServiceNameKey.String(appName),
 		),
 	)
 	if err != nil {
@@ -60,7 +58,7 @@ func InitTraceProvider(config TracerConfig) (trace.Tracer, error) {
 
 	tp := sdktrace.NewTracerProvider(traceOpts...)
 	otel.SetTextMapPropagator(TracePropagator)
-	GlobalTracer = tp.Tracer(AppName)
+	GlobalTracer = tp.Tracer(appName)
 	otel.SetTracerProvider(tp)
 	return GlobalTracer, nil
 }
