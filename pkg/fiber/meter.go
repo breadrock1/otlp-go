@@ -10,8 +10,8 @@ const (
 	metricsEndpoint = "/metrics"
 )
 
-func PrometheusMeterMiddleware(app *fiber.App) fiber.Handler {
-	prometheus := fiberprometheus.New(otlp_go.AppName)
+func PrometheusMeterMiddleware(app *fiber.App, config otlp_go.OtlpConfig) fiber.Handler {
+	prometheus := fiberprometheus.New(config.AppName)
 	prometheus.SetSkipPaths(otlp_go.ExcludedPaths)
 	prometheus.RegisterAt(app, metricsEndpoint)
 	return prometheus.Middleware

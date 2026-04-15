@@ -17,7 +17,7 @@ const (
 	ContextRequestIDKey = "request_id"
 )
 
-func StdoutLoggerMiddleware(config otlp_go.LoggerConfig) fiber.Handler {
+func StdoutLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 	logger := otlp_go.InitLocalLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {
@@ -73,7 +73,7 @@ func StdoutLoggerMiddleware(config otlp_go.LoggerConfig) fiber.Handler {
 	}
 }
 
-func RemoteLokiLoggerMiddleware(config otlp_go.LoggerConfig) fiber.Handler {
+func RemoteLokiLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 	logger := otlp_go.InitLokiLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
 		if checkFilteredURI(eCtx.Path()) {

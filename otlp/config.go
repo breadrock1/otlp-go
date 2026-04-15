@@ -1,8 +1,9 @@
 package otlp_go
 
 type OtlpConfig struct {
-	Logger LoggerConfig `yaml:"logger"`
-	Tracer TracerConfig `yaml:"tracer"`
+	AppName string       `mapstructure:"app_name"`
+	Logger  LoggerConfig `mapstructure:"logger"`
+	Tracer  TracerConfig `mapstructure:"tracer"`
 }
 
 type LoggerConfig struct {

@@ -23,14 +23,14 @@ var (
 	)
 )
 
-func InitTraceProvider(appName string, config TracerConfig) (trace.Tracer, error) {
+func InitTraceProvider(config OtlpConfig) (trace.Tracer, error) {
 	sampler := sdktrace.AlwaysSample()
 	res, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.TelemetrySDKLanguageGo,
-			semconv.ServiceNameKey.String(appName),
+			semconv.ServiceNameKey.String(config.AppName),
 		),
 	)
 	if err != nil {
@@ -41,10 +41,10 @@ func InitTraceProvider(appName string, config TracerConfig) (trace.Tracer, error
 	traceOpts = append(traceOpts, sdktrace.WithResource(res))
 	traceOpts = append(traceOpts, sdktrace.WithSampler(sampler))
 
-	if config.EnableJaeger {
+	if config.Tracer.EnableJaeger {
 		ctx := context.Background()
 		client := otlptracegrpc.NewClient(
-			otlptracegrpc.WithEndpoint(config.Address),
+			otlptracegrpc.WithEndpoint(config.Tracer.Address),
 			otlptracegrpc.WithInsecure(),
 		)
 
@@ -58,7 +58,7 @@ func InitTraceProvider(appName string, config TracerConfig) (trace.Tracer, error
 
 	tp := sdktrace.NewTracerProvider(traceOpts...)
 	otel.SetTextMapPropagator(TracePropagator)
-	GlobalTracer = tp.Tracer(appName)
+	GlobalTracer = tp.Tracer(config.AppName)
 	otel.SetTracerProvider(tp)
 	return GlobalTracer, nil
 }

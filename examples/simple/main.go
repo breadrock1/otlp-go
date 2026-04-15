@@ -18,6 +18,8 @@ import (
 	otlppfiber "github.com/breadrock1/otlp-go/pkg/fiber"
 )
 
+const AppName = "simple-app"
+
 type Server struct {
 	tracer trace.Tracer
 
@@ -25,7 +27,7 @@ type Server struct {
 }
 
 func SetupServer(otlpConfig otlp_go.OtlpConfig) *Server {
-	tracer, err := otlp_go.InitTracer(otlpConfig.Tracer)
+	tracer, err := otlp_go.InitTracer(otlpConfig)
 	if err != nil {
 		slog.Warn("failed to init tracer", slog.String("err", err.Error()))
 	}
@@ -39,10 +41,10 @@ func SetupServer(otlpConfig otlp_go.OtlpConfig) *Server {
 	serverApp.Server.Use(cors.New(cors.Config{}))
 	serverApp.Server.Use(recover.New())
 
-	serverApp.Server.Use(otlppfiber.PrometheusMeterMiddleware(serverApp.Server))
+	serverApp.Server.Use(otlppfiber.PrometheusMeterMiddleware(serverApp.Server, otlpConfig))
 	serverApp.Server.Use(otlppfiber.OtlpJaegerTracerMiddleware())
-	serverApp.Server.Use(otlppfiber.StdoutLoggerMiddleware(otlpConfig.Logger))
-	serverApp.Server.Use(otlppfiber.RemoteLokiLoggerMiddleware(otlpConfig.Logger))
+	serverApp.Server.Use(otlppfiber.StdoutLoggerMiddleware(otlpConfig))
+	serverApp.Server.Use(otlppfiber.RemoteLokiLoggerMiddleware(otlpConfig))
 
 	serverApp.Server.Get("/monitor", monitor.New())
 
@@ -66,6 +68,7 @@ func (s *Server) Shutdown(_ context.Context) error {
 	return s.Server.Shutdown()
 }
 
+//nolint
 func main() {
 	otlpConfig := otlp_go.OtlpConfig{
 		Logger: otlp_go.LoggerConfig{

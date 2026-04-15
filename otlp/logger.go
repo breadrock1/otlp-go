@@ -11,9 +11,9 @@ import (
 	slogloki "github.com/samber/slog-loki/v2"
 )
 
-func InitLocalLoggerProvider(config LoggerConfig) *slog.Logger {
+func InitLocalLoggerProvider(config OtlpConfig) *slog.Logger {
 	slogPrettyOpts := &slogpretty.Options{
-		Level: getLevelType(config),
+		Level: getLevelType(config.Logger),
 	}
 
 	textHandler := slogpretty.New(os.Stdout, slogPrettyOpts)
@@ -21,10 +21,10 @@ func InitLocalLoggerProvider(config LoggerConfig) *slog.Logger {
 	return localLogger
 }
 
-func InitLokiLoggerProvider(config LoggerConfig) *slog.Logger {
-	level := getLevelType(config)
+func InitLokiLoggerProvider(config OtlpConfig) *slog.Logger {
+	level := getLevelType(config.Logger)
 	lokiConfig := slogloki.Option{
-		Endpoint:           fmt.Sprintf("%s/api/prom/push", config.Address),
+		Endpoint:           fmt.Sprintf("%s/api/prom/push", config.Logger.Address),
 		Level:              slog.LevelInfo,
 		BatchWait:          time.Second * 5,
 		BatchEntriesNumber: 10,
@@ -33,8 +33,8 @@ func InitLokiLoggerProvider(config LoggerConfig) *slog.Logger {
 	lokiHandler := lokiConfig.NewLokiHandler()
 
 	logger := slog.New(lokiHandler).
-		With("service_name", AppName).
-		With("service", AppName).
+		With("service_name", config.AppName).
+		With("service", config.AppName).
 		With("detected_level", level).
 		With("level", level)
 
@@ -42,19 +42,16 @@ func InitLokiLoggerProvider(config LoggerConfig) *slog.Logger {
 }
 
 func getLevelType(config LoggerConfig) slog.Level {
-	var logLevel = slog.LevelInfo
 	switch config.Level {
 	case "debug":
-		logLevel = slog.LevelDebug
+		return slog.LevelDebug
 	case "info":
-		logLevel = slog.LevelInfo
+		return slog.LevelInfo
 	case "warn":
-		logLevel = slog.LevelWarn
+		return slog.LevelWarn
 	case "error":
-		logLevel = slog.LevelError
+		return slog.LevelError
 	default:
-		logLevel = slog.LevelInfo
+		return slog.LevelInfo
 	}
-
-	return logLevel
 }

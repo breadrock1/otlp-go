@@ -6,14 +6,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func InitTracer(appName string, config TracerConfig) (trace.Tracer, error) {
-	return InitTraceProvider(appName, config)
-}
-
-func InitLocalLogger(config LoggerConfig) *slog.Logger {
+func InitLocalLogger(config OtlpConfig) *slog.Logger {
 	return InitLocalLoggerProvider(config)
 }
 
-func InitRemoteLogger(config LoggerConfig) *slog.Logger {
+func InitRemoteLogger(config OtlpConfig) *slog.Logger {
 	return InitLokiLoggerProvider(config)
+}
+
+func InitTracer(config OtlpConfig) (trace.Tracer, error) {
+	return InitTraceProvider(config)
 }
