@@ -6,6 +6,7 @@ var (
 		"/metrics",
 		"/favicon.ico",
 		"/static/",
+		"/api/metrics",
 		"/api/swagger",
 	}
 )
