@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	XUserIDHeaderKey    = "X-User-ID"
 	XRequestIDHeaderKey = "X-Request-ID"
 	ContextRequestIDKey = "request_id"
 )
@@ -55,7 +56,7 @@ func StdoutLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 			responseMsg = string(eCtx.Response().Body())
 		}
 
-		logger.LogAttrs(ctx, level, "http-request",
+		slogAttrs := []slog.Attr{
 			slog.String("request_id", requestID),
 			slog.String("method", eCtx.Method()),
 			slog.String("uri", eCtx.OriginalURL()),
@@ -67,7 +68,10 @@ func StdoutLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 			slog.String("referer", eCtx.Get("Referer")),
 			slog.String("client_ip", eCtx.IP()),
 			slog.String("user_agent", eCtx.Get("User-Agent")),
-		)
+			slog.String("user_id", eCtx.Get(XUserIDHeaderKey)),
+		}
+
+		logger.LogAttrs(ctx, level, "http-request", slogAttrs...)
 
 		return err
 	}
@@ -104,6 +108,7 @@ func RemoteLokiLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 			"uri":        eCtx.Path(),
 			"client_ip":  eCtx.IP(),
 			"user_agent": eCtx.Request(),
+			"user_id":    eCtx.Get(XUserIDHeaderKey),
 		}
 		jsonMessage, _ := json.Marshal(logMessage)
 
