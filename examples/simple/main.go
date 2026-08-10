@@ -1,4 +1,4 @@
-package simple
+package main
 
 import (
 	"context"
@@ -18,7 +18,11 @@ import (
 	otlppfiber "github.com/breadrock1/otlp-go/pkg/fiber"
 )
 
-const AppName = "simple-app"
+const (
+	AppName = "simple-app"
+
+	MetricsEndpoint = "/api/metrics"
+)
 
 type Server struct {
 	tracer trace.Tracer
@@ -68,13 +72,17 @@ func (s *Server) Shutdown(_ context.Context) error {
 	return s.Server.Shutdown()
 }
 
-//nolint
+// nolint
 func main() {
 	otlpConfig := otlp_go.OtlpConfig{
 		Logger: otlp_go.LoggerConfig{
 			Level:      "debug",
 			Address:    "http://loki:3100",
 			EnableLoki: true,
+		},
+		Meter: otlp_go.MeterConfig{
+			EndpointURI:   MetricsEndpoint,
+			ExcludedPaths: []string{MetricsEndpoint},
 		},
 		Tracer: otlp_go.TracerConfig{
 			Address:      "http://jaeger:4317",
