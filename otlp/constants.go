@@ -10,3 +10,8 @@ var (
 		"/api/swagger",
 	}
 )
+
+func AppendExcludedPath(excluded []string) []string {
+	ExcludedPaths = append(ExcludedPaths, excluded...)
+	return ExcludedPaths
+}
