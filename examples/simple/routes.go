@@ -11,7 +11,7 @@ const (
 )
 
 func (s *Server) CreateGroup(group fiber.Router) {
-	group.Get(HelloEndpoint, adaptor.HTTPHandler(promhttp.Handler()))
+	group.Get(HelloEndpoint, UserContext(), adaptor.HTTPHandler(promhttp.Handler()))
 }
 
 func (s *Server) Hello(eCtx *fiber.Ctx) error {

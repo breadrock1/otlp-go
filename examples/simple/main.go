@@ -79,6 +79,7 @@ func main() {
 			Level:      "debug",
 			Address:    "http://loki:3100",
 			EnableLoki: true,
+			Attributes: []string{"x_user_id"},
 		},
 		Meter: otlp_go.MeterConfig{
 			EndpointURI:   MetricsEndpoint,
