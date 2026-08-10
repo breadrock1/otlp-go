@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	XUserIDHeaderKey    = "X-User-ID"
 	XRequestIDHeaderKey = "X-Request-ID"
 	ContextRequestIDKey = "request_id"
 )
@@ -68,7 +67,10 @@ func StdoutLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 			slog.String("referer", eCtx.Get("Referer")),
 			slog.String("client_ip", eCtx.IP()),
 			slog.String("user_agent", eCtx.Get("User-Agent")),
-			slog.String("user_id", eCtx.Get(XUserIDHeaderKey)),
+		}
+
+		for _, attribute := range extractContextLocals(eCtx, config.Logger.Attributes) {
+			slogAttrs = append(slogAttrs, attribute)
 		}
 
 		logger.LogAttrs(ctx, level, "http-request", slogAttrs...)
@@ -108,8 +110,12 @@ func RemoteLokiLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 			"uri":        eCtx.Path(),
 			"client_ip":  eCtx.IP(),
 			"user_agent": eCtx.Request(),
-			"user_id":    eCtx.Get(XUserIDHeaderKey),
 		}
+
+		for attrKey, attribute := range extractContextLocals(eCtx, config.Logger.Attributes) {
+			logMessage[attrKey] = attribute.Value.String()
+		}
+
 		jsonMessage, _ := json.Marshal(logMessage)
 
 		ctx, cancel := context.WithTimeout(eCtx.Context(), 5*time.Second)
@@ -118,6 +124,20 @@ func RemoteLokiLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 
 		return err
 	}
+}
+
+func extractContextLocals(eCtx *fiber.Ctx, locals []string) map[string]slog.Attr {
+	attributes := make(map[string]slog.Attr)
+	for _, localKey := range locals {
+		val, ok := eCtx.Locals(localKey).(string)
+		if !ok || val == "" {
+			continue
+		}
+
+		attributes[localKey] = slog.String(localKey, val)
+	}
+
+	return attributes
 }
 
 func checkFilteredURI(urlPath string) bool {
