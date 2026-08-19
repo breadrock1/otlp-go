@@ -8,10 +8,20 @@ type OtlpConfig struct {
 }
 
 type LoggerConfig struct {
-	Level      string   `mapstructure:"level"`
-	Address    string   `mapstructure:"address"`
-	EnableLoki bool     `mapstructure:"enable_loki"`
-	Attributes []string `mapstructure:"attributes"`
+	Level      string             `mapstructure:"level"`
+	Attributes []string           `mapstructure:"attributes"`
+	Loki       LokiLoggerConfig   `mapstructure:"loki"`
+	Syslog     SyslogLoggerConfig `mapstructure:"syslog"`
+}
+
+type SyslogLoggerConfig struct {
+	Address string `mapstructure:"address"`
+	Enable  bool   `mapstructure:"enable"`
+}
+
+type LokiLoggerConfig struct {
+	Address string `mapstructure:"address"`
+	Enable  bool   `mapstructure:"enable"`
 }
 
 type MeterConfig struct {

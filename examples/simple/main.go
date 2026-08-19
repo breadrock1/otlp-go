@@ -48,6 +48,7 @@ func SetupServer(otlpConfig otlp_go.OtlpConfig) *Server {
 	serverApp.Server.Use(otlppfiber.PrometheusMeterMiddleware(serverApp.Server, otlpConfig))
 	serverApp.Server.Use(otlppfiber.OtlpJaegerTracerMiddleware())
 	serverApp.Server.Use(otlppfiber.StdoutLoggerMiddleware(otlpConfig))
+	serverApp.Server.Use(otlppfiber.SyslogLoggerMiddleware(otlpConfig))
 	serverApp.Server.Use(otlppfiber.RemoteLokiLoggerMiddleware(otlpConfig))
 
 	serverApp.Server.Get("/monitor", monitor.New())
@@ -75,11 +76,18 @@ func (s *Server) Shutdown(_ context.Context) error {
 // nolint
 func main() {
 	otlpConfig := otlp_go.OtlpConfig{
+		AppName: AppName,
 		Logger: otlp_go.LoggerConfig{
 			Level:      "debug",
-			Address:    "http://loki:3100",
-			EnableLoki: true,
 			Attributes: []string{"x_user_id"},
+			Loki: otlp_go.LokiLoggerConfig{
+				Address: "http://loki:3100",
+				Enable:  true,
+			},
+			Syslog: otlp_go.SyslogLoggerConfig{
+				Address: "metrics.sova.local:514",
+				Enable:  true,
+			},
 		},
 		Meter: otlp_go.MeterConfig{
 			EndpointURI:   MetricsEndpoint,

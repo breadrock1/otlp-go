@@ -79,6 +79,59 @@ func StdoutLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 	}
 }
 
+func SyslogLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
+	logger := otlp_go.InitSyslogLoggerProvider(config)
+	return func(eCtx *fiber.Ctx) error {
+		if checkFilteredURI(eCtx.Path()) {
+			return eCtx.Next()
+		}
+
+		requestID := eCtx.Get(XRequestIDHeaderKey)
+		if requestID == "" {
+			requestID = uuid.New().String()
+			eCtx.Set(XRequestIDHeaderKey, requestID)
+		}
+
+		ctx := context.WithValue(eCtx.UserContext(), ContextRequestIDKey, requestID)
+		eCtx.SetUserContext(ctx)
+
+		err := eCtx.Next()
+
+		statusCode := eCtx.Response().StatusCode()
+		if err != nil {
+			//nolint
+			if fiberErr, ok := err.(*fiber.Error); ok {
+				statusCode = fiberErr.Code
+			}
+		}
+
+		var responseMsg = "Ok"
+		var level = slog.LevelInfo
+		if statusCode >= 300 {
+			level = slog.LevelError
+			responseMsg = string(eCtx.Response().Body())
+		}
+
+		slogAttrs := []slog.Attr{
+			slog.String("request_id", requestID),
+			slog.String("method", eCtx.Method()),
+			slog.String("uri", eCtx.OriginalURL()),
+			slog.Int("status", statusCode),
+			slog.String("message", responseMsg),
+			slog.String("client_ip", eCtx.IP()),
+			slog.String("user_agent", eCtx.Get("User-Agent")),
+		}
+
+		for _, attribute := range extractContextLocals(eCtx, config.Logger.Attributes) {
+			slogAttrs = append(slogAttrs, attribute)
+		}
+
+		logger.LogAttrs(ctx, level, "http-request", slogAttrs...)
+
+		return err
+	}
+}
+
 func RemoteLokiLoggerMiddleware(config otlp_go.OtlpConfig) fiber.Handler {
 	logger := otlp_go.InitLokiLoggerProvider(config)
 	return func(eCtx *fiber.Ctx) error {
